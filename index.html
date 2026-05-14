@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MB Distribuidora</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-deep: #0A2540;
+    --blue-mid: #1A4A8A;
+    --blue-bright: #0EA5E9;
+    --blue-light: #BAE6FD;
+    --cyan: #22D3EE;
+    --white: #F0F9FF;
+    --text: #0C1A2E;
+    --text-muted: #4A7090;
+    --surface: rgba(255,255,255,0.07);
+    --wa-green: #25D366;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-deep);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated water background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(14,165,233,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 80%, rgba(34,211,238,0.12) 0%, transparent 60%),
+      linear-gradient(180deg, #0A2540 0%, #0D2F55 60%, #092038 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Floating bubbles */
+  .bubbles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bubble {
+    position: absolute;
+    bottom: -60px;
+    border-radius: 50%;
+    background: rgba(186,230,253,0.08);
+    border: 1px solid rgba(186,230,253,0.15);
+    animation: rise linear infinite;
+  }
+  .bubble:nth-child(1)  { width:24px; height:24px; left:10%; animation-duration:12s; animation-delay:0s; }
+  .bubble:nth-child(2)  { width:14px; height:14px; left:25%; animation-duration:9s;  animation-delay:2s; }
+  .bubble:nth-child(3)  { width:36px; height:36px; left:42%; animation-duration:15s; animation-delay:4s; }
+  .bubble:nth-child(4)  { width:10px; height:10px; left:60%; animation-duration:8s;  animation-delay:1s; }
+  .bubble:nth-child(5)  { width:20px; height:20px; left:75%; animation-duration:11s; animation-delay:3s; }
+  .bubble:nth-child(6)  { width:16px; height:16px; left:88%; animation-duration:10s; animation-delay:5s; }
+
+  @keyframes rise {
+    0%   { transform: translateY(0) scale(1); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
+  }
+
+  /* Layout */
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 120px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    padding: 32px 24px 20px;
+    text-align: center;
+  }
+
+  .logo-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-bright), var(--cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 32px;
+    box-shadow: 0 0 0 8px rgba(14,165,233,0.15), 0 0 40px rgba(14,165,233,0.3);
+    animation: pulse-ring 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 8px rgba(14,165,233,0.15), 0 0 40px rgba(14,165,233,0.3); }
+    50%       { box-shadow: 0 0 0 14px rgba(14,165,233,0.08), 0 0 60px rgba(14,165,233,0.4); }
+  }
+
+  h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--white);
+    text-shadow: 0 0 30px rgba(14,165,233,0.5);
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--blue-light);
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    padding: 0 24px;
+    margin-bottom: 10px;
+  }
+
+  /* Product cards */
+  .products {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .product-card {
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(186,230,253,0.15);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(14,165,233,0.08), transparent);
+    opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+  }
+
+  .product-card:hover { border-color: rgba(14,165,233,0.4); transform: translateX(2px); }
+  .product-card:hover::before { opacity: 1; }
+
+  .product-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(14,165,233,0.25), rgba(34,211,238,0.15));
+    border: 0.5px solid rgba(14,165,233,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .product-info { flex: 1; }
+  .product-name { font-weight: 600; font-size: 15px; color: var(--white); }
+  .product-desc { font-size: 12px; color: var(--blue-light); opacity: 0.7; margin-top: 2px; }
+  .product-price {
+    font-family: 'Righteous', cursive;
+    font-size: 17px;
+    color: var(--cyan);
+  }
+
+  /* Qty controls */
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(14,165,233,0.5);
+    background: rgba(14,165,233,0.15);
+    color: var(--cyan);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    line-height: 1;
+  }
+
+  .qty-btn:hover { background: rgba(14,165,233,0.3); transform: scale(1.1); }
+  .qty-btn:active { transform: scale(0.95); }
+
+  .qty-num {
+    font-family: 'Righteous', cursive;
+    font-size: 18px;
+    color: var(--white);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Form section */
+  .form-section {
+    padding: 0 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-card {
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(186,230,253,0.12);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .input-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .input-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue-light); opacity: 0.7; }
+
+  input, textarea, select {
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(186,230,253,0.2);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .2s;
+    width: 100%;
+  }
+
+  input::placeholder, textarea::placeholder { color: rgba(186,230,253,0.35); }
+  input:focus, textarea:focus, select:focus { border-color: rgba(14,165,233,0.6); }
+  select option { background: #0A2540; color: var(--white); }
+  textarea { resize: none; min-height: 70px; }
+
+  /* Order summary */
+  .summary-section {
+    padding: 0 16px;
+    margin-bottom: 20px;
+  }
+
+  .summary-card {
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(186,230,253,0.12);
+    border-radius: 16px;
+    padding: 16px 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--blue-light);
+    opacity: 0.8;
+  }
+
+  .summary-row.total {
+    border-top: 0.5px solid rgba(186,230,253,0.15);
+    margin-top: 8px;
+    padding-top: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    opacity: 1;
+  }
+
+  .summary-row.total span:last-child {
+    font-family: 'Righteous', cursive;
+    color: var(--cyan);
+    font-size: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: rgba(186,230,253,0.35);
+    font-size: 13px;
+    padding: 10px 0;
+  }
+
+  /* WhatsApp button */
+  .wa-btn-wrap {
+    padding: 0 16px;
+  }
+
+  .wa-btn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 30px rgba(37,211,102,0.35);
+    transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+
+  .wa-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(37,211,102,0.45); }
+  .wa-btn:active { transform: translateY(0); }
+  .wa-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .wa-icon { font-size: 22px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: rgba(10,37,64,0.95);
+    border: 0.5px solid rgba(14,165,233,0.4);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--cyan);
+    backdrop-filter: blur(12px);
+    transition: transform .3s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Badge */
+  .badge {
+    background: var(--cyan);
+    color: var(--blue-deep);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 99px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Divider */
+  .divider { height: 0.5px; background: rgba(186,230,253,0.1); margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<div class="bubbles">
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+</div>
+
+<div class="app">
+
+  <header>
+    <div class="logo-ring">💧</div>
+    <h1>MB Distribuidora</h1>
+    <p class="tagline">Entrega rápida na sua porta</p>
+  </header>
+
+  <!-- Products -->
+  <div class="section-label">Escolha seus produtos</div>
+  <div class="products" id="products-list">
+
+    <div class="product-card">
+      <div class="product-icon">🪣</div>
+      <div class="product-info">
+        <div class="product-name">Galão 20L</div>
+        <div class="product-desc">Água mineral natural</div>
+        <div class="product-price">R$ 12,00</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(0, -1)">−</button>
+        <span class="qty-num" id="qty-0">0</span>
+        <button class="qty-btn" onclick="changeQty(0, +1)">+</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-icon">🧴</div>
+      <div class="product-info">
+        <div class="product-name">Galão 10L</div>
+        <div class="product-desc">Água mineral natural</div>
+        <div class="product-price">R$ 7,00</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(1, -1)">−</button>
+        <span class="qty-num" id="qty-1">0</span>
+        <button class="qty-btn" onclick="changeQty(1, +1)">+</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-icon">🫙</div>
+      <div class="product-info">
+        <div class="product-name">Garrafa 5L</div>
+        <div class="product-desc">Água mineral gelada</div>
+        <div class="product-price">R$ 5,00</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(2, -1)">−</button>
+        <span class="qty-num" id="qty-2">0</span>
+        <button class="qty-btn" onclick="changeQty(2, +1)">+</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-icon">🥤</div>
+      <div class="product-info">
+        <div class="product-name">Garrafa 1,5L</div>
+        <div class="product-desc">Pack com 6 unidades</div>
+        <div class="product-price">R$ 14,00</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(3, -1)">−</button>
+        <span class="qty-num" id="qty-3">0</span>
+        <button class="qty-btn" onclick="changeQty(3, +1)">+</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-icon">🔁</div>
+      <div class="product-info">
+        <div class="product-name">Vasilhame vazio</div>
+        <div class="product-desc">Devolver galão</div>
+        <div class="product-price">− R$ 4,00</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(4, -1)">−</button>
+        <span class="qty-num" id="qty-4">0</span>
+        <button class="qty-btn" onclick="changeQty(4, +1)">+</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Resumo -->
+  <div class="section-label">Resumo do pedido</div>
+  <div class="summary-section">
+    <div class="summary-card">
+      <div id="summary-items"><p class="empty-state">Nenhum item selecionado</p></div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span id="total-price">R$ 0,00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dados do cliente -->
+  <div class="section-label">Seus dados</div>
+  <div class="form-section">
+    <div class="form-card">
+      <div class="input-wrap">
+        <label class="input-label">Seu nome</label>
+        <input type="text" id="field-nome" placeholder="Ex: João Silva" />
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Endereço de entrega</label>
+        <input type="text" id="field-endereco" placeholder="Rua, número, bairro" />
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Ponto de referência</label>
+        <input type="text" id="field-ref" placeholder="Próximo a..." />
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Forma de pagamento</label>
+        <select id="field-pgto">
+          <option value="">Selecione...</option>
+          <option value="Dinheiro">💵 Dinheiro</option>
+          <option value="Pix">📱 Pix</option>
+          <option value="Cartão de débito">💳 Cartão de débito</option>
+          <option value="Cartão de crédito">💳 Cartão de crédito</option>
+        </select>
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Observações <span style="opacity:.4;font-weight:400;text-transform:none">(opcional)</span></label>
+        <textarea id="field-obs" placeholder="Alguma instrução especial..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão WhatsApp -->
+  <div class="wa-btn-wrap">
+    <button class="wa-btn" id="wa-btn" onclick="enviarWhatsApp()">
+      <span class="wa-icon">📲</span>
+      Enviar pedido pelo WhatsApp
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PHONE = '5588532530'; // ← Troque pelo número da loja (com DDI+DDD, sem espaços)
+
+  const products = [
+    { name: 'Galão 20L',       price: 12.00 },
+    { name: 'Galão 10L',       price:  7.00 },
+    { name: 'Garrafa 5L',      price:  5.00 },
+    { name: 'Garrafa 1,5L (pack c/6)', price: 14.00 },
+    { name: 'Vasilhame vazio (desconto)', price: -4.00 },
+  ];
+
+  const qtys = [0, 0, 0, 0, 0];
+
+  function changeQty(idx, delta) {
+    qtys[idx] = Math.max(0, qtys[idx] + delta);
+    document.getElementById('qty-' + idx).textContent = qtys[idx];
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const container = document.getElementById('summary-items');
+    let html = '';
+    let total = 0;
+    let hasItems = false;
+
+    qtys.forEach((q, i) => {
+      if (q > 0) {
+        const subtotal = products[i].price * q;
+        total += subtotal;
+        hasItems = true;
+        html += `<div class="summary-row">
+          <span>${products[i].name} × ${q}</span>
+          <span>${subtotal < 0 ? '− ' : ''}R$ ${Math.abs(subtotal).toFixed(2).replace('.', ',')}</span>
+        </div>`;
+      }
+    });
+
+    container.innerHTML = hasItems ? html : '<p class="empty-state">Nenhum item selecionado</p>';
+    document.getElementById('total-price').textContent =
+      'R$ ' + Math.max(0, total).toFixed(2).replace('.', ',');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function enviarWhatsApp() {
+    const nome    = document.getElementById('field-nome').value.trim();
+    const end     = document.getElementById('field-endereco').value.trim();
+    const ref     = document.getElementById('field-ref').value.trim();
+    const pgto    = document.getElementById('field-pgto').value;
+    const obs     = document.getElementById('field-obs').value.trim();
+
+    const hasItems = qtys.some(q => q > 0);
+    if (!hasItems)      return showToast('⚠️ Adicione pelo menos um produto');
+    if (!nome)          return showToast('⚠️ Informe seu nome');
+    if (!end)           return showToast('⚠️ Informe o endereço de entrega');
+    if (!pgto)          return showToast('⚠️ Escolha a forma de pagamento');
+
+    let itens = '';
+    let total = 0;
+    qtys.forEach((q, i) => {
+      if (q > 0) {
+        const sub = products[i].price * q;
+        total += sub;
+        itens += `  • ${products[i].name} × ${q} = R$ ${Math.abs(sub).toFixed(2).replace('.', ',')}\n`;
+      }
+    });
+
+    const msg =
+`🚰 *NOVO PEDIDO – MB Distribuidora*
+
+*👤 Cliente:* ${nome}
+*📍 Endereço:* ${end}${ref ? '\n*📌 Referência:* ' + ref : ''}
+*💳 Pagamento:* ${pgto}
+
+*🛒 Itens:*
+${itens}
+*💧 Total: R$ ${Math.max(0, total).toFixed(2).replace('.', ',')}*${obs ? '\n\n*📝 Obs:* ' + obs : ''}
+
+_Pedido enviado pelo site MB Distribuidora_`;
+
+    const url = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+  }
+</script>
+</body>
+</html>
